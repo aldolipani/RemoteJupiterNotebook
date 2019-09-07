@@ -13,7 +13,7 @@ function pssh {
    /usr/bin/expect <(cat << EOF
       set timeout 5
       log_user 0
-      spawn ssh -o StrictHostKeyChecking=no $USER_AND_HOST "$1"
+      spawn ssh -o PreferredAuthentications=password -o StrictHostKeyChecking=no $USER_AND_HOST "$1"
       expect "*:"
       send "$PWD\r"
       interact
@@ -47,7 +47,7 @@ echo To not lose the connection, please do not close this program!
 
 /usr/bin/expect <(cat << EOF
    log_user 0
-   spawn ssh -o StrictHostKeyChecking=no -N -L $PORT:localhost:$PORT $USER_AND_HOST
+   spawn ssh -o PreferredAuthentications=password -o StrictHostKeyChecking=no -N -L $PORT:localhost:$PORT $USER_AND_HOST
    expect "*:"
    send "$PWD\r"
    interact
