@@ -1,2 +1,2 @@
 # RemoteJupyterNotebook
-This is a script that will allow you to start and work with a remote Jupyter notebook with ease.
+This repository contains a script that will allow you to start and work with a Jupiter notebook in remote with ease.
