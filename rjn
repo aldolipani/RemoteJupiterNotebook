@@ -1,0 +1,54 @@
+#!/bin/bash
+
+USER_AND_HOST=$1
+
+ANACONDA="~/anaconda3/bin"
+
+echo Remote Jupyter Notebook v0.1
+
+read -p "$USER_AND_HOST's password:" -s PWD
+echo 
+
+function pssh {
+   /usr/bin/expect <(cat << EOF
+      set timeout 5
+      log_user 0
+      spawn ssh -o StrictHostKeyChecking=no $USER_AND_HOST "$1"
+      expect "*:"
+      send "$PWD\r"
+      interact
+   )
+}
+
+USER=$(pssh whoami | sed 1d)
+
+# get open jupyter sessions
+SESSIONS=$(pssh "$ANACONDA/jupyter notebook list" | grep $USER)
+
+# if no jupyter sessions are open, create a new one
+if [ -z "$SESSIONS" ]
+then
+   echo No Jupyter sessions found, one is being created!
+   pssh "$ANACONDA/jupyter notebook --no-browser &> /dev/null &" 
+   
+   # get open jupyter sessions
+   SESSIONS=$(pssh "$ANACONDA/jupyter notebook list" | grep $USER)
+fi
+
+URL=$(echo "$SESSIONS" | cut -d' ' -f 1)
+
+PORT=$(echo "$URL" | sed 's/.*\:\([0-9][0-9]*\)\/.*/\1/g')
+
+echo Your Jupyter session is running at this url: 
+
+echo $URL
+
+echo To not lose the connection, please do not close this program!
+
+/usr/bin/expect <(cat << EOF
+   log_user 0
+   spawn ssh -o StrictHostKeyChecking=no -N -L $PORT:localhost:$PORT $USER_AND_HOST
+   expect "*:"
+   send "$PWD\r"
+   interact
+)
